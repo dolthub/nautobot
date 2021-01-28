@@ -108,7 +108,7 @@ CORS_ORIGIN_WHITELIST = [
 
 Default: `$INSTALL_ROOT/netbox/custom-jobs/`
 
-The file path to a directory where custom jobs can be located. By default, this is the `netbox/custom-jobs/` directory within the base NetBox installation path.
+The file path to a directory where [custom jobs](../additional-features/custom-jobs.md) can be located. By default, this is the `netbox/custom-jobs/` directory within the base NetBox installation path.
 
 !!! note
     This directory **must** contain an `__init__.py` file.
@@ -214,11 +214,21 @@ EXEMPT_VIEW_PERMISSIONS = ['*']
 
 ---
 
+## GIT_ROOT
+
+Default: `$INSTALL_ROOT/netbox/git`
+
+The file path to a directory where cloned [Git repositories](../models/extras/gitrepository.md) will be located.
+
+---
+
 ## GRAPHQL_CUSTOM_FIELD_PREFIX
 
 Default: `cf`
 
 By default, all custom fields in GraphQL will be prefixed with `cf`. A custom field name `my_field` will appear in GraphQL as `cf_my_field` by default. It's possible to change or remove the prefix by setting the value of `GRAPHQL_CUSTOM_FIELD_PREFIX`.
+
+---
 
 ## HTTP_PROXIES
 
@@ -453,7 +463,7 @@ This parameter defines the URL of the repository that will be checked periodical
 
 Default: `$INSTALL_ROOT/netbox/reports/`
 
-The file path to a location where custom jobs can be located. By default, this is the `netbox/reports/` directory within the base NetBox installation path.
+The file path to a location where [custom jobs](../additional-features/custom-jobs.md) can be located. By default, this is the `netbox/reports/` directory within the base NetBox installation path.
 
 !!! warning
     This setting is deprecated and will be removed in a future release. Use `CUSTOM_JOBS_ROOT` instead.
@@ -464,7 +474,7 @@ The file path to a location where custom jobs can be located. By default, this i
 
 Default: `300`
 
-The maximum execution time of a background task (such as running a custom script), in seconds.
+The maximum execution time of a background task (such as running a [custom job](../additional-features/custom-jobs.md)), in seconds.
 
 ---
 
@@ -472,7 +482,7 @@ The maximum execution time of a background task (such as running a custom script
 
 Default: `$INSTALL_ROOT/netbox/scripts/`
 
-The file path to a directory where custom jobs can be located. By default, this is the `netbox/scripts/` directory within the base NetBox installation path.
+The file path to a directory where [custom jobs](../additional-features/custom-jobs.md) can be located. By default, this is the `netbox/scripts/` directory within the base NetBox installation path.
 
 !!! warning
     This setting is deprecated and will be removed in a future release. Use `CUSTOM_JOBS_ROOT` instead.

@@ -12,7 +12,10 @@ from utilities.forms import (
 )
 from virtualization.models import Cluster, ClusterGroup
 from .choices import *
-from .models import ConfigContext, CustomField, CustomJob, ImageAttachment, JobResult, ObjectChange, Tag
+from .datasources import get_datasource_content_choices
+from .models import (
+    ConfigContext, CustomField, CustomJob, GitRepository, ImageAttachment, JobResult, ObjectChange, Tag
+)
 
 
 #
@@ -254,6 +257,7 @@ class ConfigContextFilterForm(BootstrapMixin, forms.Form):
         required=False,
         label='Search'
     )
+    # FIXME(glenn) filtering by owner_content_type
     region = DynamicModelMultipleChoiceField(
         queryset=Region.objects.all(),
         to_field_name='slug',
@@ -313,6 +317,92 @@ class LocalConfigContextFilterForm(forms.Form):
             choices=BOOLEAN_WITH_BLANK_CHOICES
         )
     )
+
+
+#
+# Git repositories and other data sources
+#
+
+def get_git_datasource_content_choices():
+    return get_datasource_content_choices("extras.GitRepository")
+
+
+class PasswordInputWithPlaceholder(forms.PasswordInput):
+    """PasswordInput that is populated with a placeholder value if any existing value is present."""
+
+    def __init__(self, attrs=None, placeholder="", render_value=False):
+        if placeholder:
+            render_value = True
+        self._placeholder = placeholder
+        super().__init__(attrs=attrs, render_value=render_value)
+
+    def get_context(self, name, value, attrs):
+        if value:
+            value = self._placeholder
+        return super().get_context(name, value, attrs)
+
+
+class GitRepositoryForm(BootstrapMixin, forms.ModelForm):
+
+    slug = SlugField(help_text="Filesystem-friendly unique shorthand")
+
+    remote_url = forms.URLField(
+        required=True,
+        label="Remote URL",
+        help_text='Only http:// and https:// URLs are presently supported',
+    )
+
+    _token = forms.CharField(
+        required=False,
+        label="Token",
+        widget=PasswordInputWithPlaceholder(placeholder=GitRepository.TOKEN_PLACEHOLDER),
+    )
+
+    provided_contents = forms.MultipleChoiceField(
+        required=False,
+        label="Provides",
+        choices=get_git_datasource_content_choices,
+    )
+
+    class Meta:
+        model = GitRepository
+        fields = [
+            'name',
+            'slug',
+            'remote_url',
+            'branch',
+            '_token',
+            'provided_contents',
+        ]
+
+
+class GitRepositoryCSVForm(CSVModelForm):
+
+    class Meta:
+        model = GitRepository
+        fields = GitRepository.csv_headers
+
+
+class GitRepositoryBulkEditForm(BootstrapMixin, BulkEditForm):
+    pk = forms.ModelMultipleChoiceField(
+        queryset=GitRepository.objects.all(),
+        widget=forms.MultipleHiddenInput(),
+    )
+    remote_url = forms.CharField(
+        label="Remote URL",
+        required=False,
+    )
+    branch = forms.CharField(
+        required=False,
+    )
+    _token = forms.CharField(
+        required=False,
+        label="Token",
+        widget=PasswordInputWithPlaceholder(placeholder=GitRepository.TOKEN_PLACEHOLDER),
+    )
+
+    class Meta:
+        model = GitRepository
 
 
 #
@@ -400,22 +490,11 @@ class CustomJobForm(BootstrapMixin, forms.Form):
         return bool(len(self.fields) > 1)
 
 
-def custom_jobs_choices():
-    from .custom_jobs import get_custom_jobs
-    custom_jobs = get_custom_jobs()
-    return [(f"{module}.{job}", f"{module}.{job}") for module, module_jobs in custom_jobs.items() for job in module_jobs["jobs"]]
-
-
 class JobResultFilterForm(BootstrapMixin, forms.Form):
     model = JobResult
     q = forms.CharField(required=False, label='Search')
-    name = forms.MultipleChoiceField(
-        required=False,
-        label='Custom Job',
-        choices=custom_jobs_choices,
-        widget=StaticSelect2Multiple,
-    )
-    # custom_job = ...get_custom_jobs()...
+    # FIXME(glenn) Filtering by obj_type?
+    name = forms.CharField(required=False)
     user = DynamicModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,

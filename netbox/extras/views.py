@@ -1,9 +1,16 @@
+import logging
+
 from django import template
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.views.generic import View
 from django_rq.queues import get_connection
 from django_tables2 import RequestConfig
@@ -16,8 +23,9 @@ from utilities.utils import copy_safe_request, count_related, shallow_compare_di
 from utilities.views import ContentTypePermissionRequiredMixin
 from . import filters, forms, tables
 from .choices import JobResultStatusChoices
-from .models import ConfigContext, ImageAttachment, ObjectChange, JobResult, Tag, TaggedItem
+from .models import ConfigContext, GitRepository, ImageAttachment, ObjectChange, JobResult, Tag, TaggedItem
 from .custom_jobs import get_custom_job, get_custom_jobs, run_custom_job
+from .datasources import get_datasource_contents, enqueue_pull_git_repository_and_refresh_data
 
 
 #
@@ -67,6 +75,9 @@ class TagBulkDeleteView(generic.BulkDeleteView):
 #
 # Config contexts
 #
+
+# TODO: disallow (or at least warn) user from manually editing config contexts that
+# have an associated owner, such as a Git repository
 
 class ConfigContextListView(generic.ObjectListView):
     queryset = ConfigContext.objects.all()
@@ -254,6 +265,130 @@ class ObjectChangeLogView(View):
 
 
 #
+# Git repositories
+#
+
+class GitRepositoryListView(generic.ObjectListView):
+    queryset = GitRepository.objects.all()
+    # filterset = filters.GitRepositoryFilterSet
+    # filterset_form = forms.GitRepositoryFilterForm
+    table = tables.GitRepositoryTable
+    template_name = 'extras/gitrepository_list.html'
+
+    def extra_context(self):
+        git_repository_content_type = ContentType.objects.get(app_label='extras', model='gitrepository')
+        # Get the newest results for each repository name
+        results = {
+            r.name: r
+            for r in JobResult.objects.filter(
+                obj_type=git_repository_content_type,
+                status__in=JobResultStatusChoices.TERMINAL_STATE_CHOICES
+            ).order_by('completed').defer('data')
+        }
+        return {
+            'job_results': results,
+            'datasource_contents': get_datasource_contents('extras.GitRepository'),
+        }
+
+
+class GitRepositoryView(generic.ObjectView):
+    queryset = GitRepository.objects.all()
+
+    def get_extra_context(self, request, instance):
+        return {
+            'datasource_contents': get_datasource_contents('extras.GitRepository'),
+        }
+
+
+class GitRepositoryEditView(generic.ObjectEditView):
+    queryset = GitRepository.objects.all()
+    model_form = forms.GitRepositoryForm
+
+    def alter_obj(self, obj, request, url_args, url_kwargs):
+        # A GitRepository needs to know the originating request when it's saved so that it can enqueue using it
+        obj.request = request
+        return super().alter_obj(obj, request, url_args, url_kwargs)
+
+    def get_return_url(self, request, obj):
+        if request.method == "POST":
+            return reverse('extras:gitrepository_result', kwargs={'slug': obj.slug})
+        return super().get_return_url(request, obj)
+
+
+class GitRepositoryDeleteView(generic.ObjectDeleteView):
+    queryset = GitRepository.objects.all()
+
+
+class GitRepositoryBulkImportView(generic.BulkImportView):
+    queryset = GitRepository.objects.all()
+    model_form = forms.GitRepositoryCSVForm
+    table = tables.GitRepositoryBulkTable
+
+
+class GitRepositoryBulkEditView(generic.BulkEditView):
+    queryset = GitRepository.objects.all()
+    filterset = filters.GitRepositoryFilterSet
+    table = tables.GitRepositoryBulkTable
+    form = forms.GitRepositoryBulkEditForm
+
+    def alter_obj(self, obj, request, url_args, url_kwargs):
+        # A GitRepository needs to know the originating request when it's saved so that it can enqueue using it
+        obj.request = request
+        return super().alter_obj(obj, request, url_args, url_kwargs)
+
+    def extra_context(self):
+        return {
+            'datasource_contents': get_datasource_contents('extras.GitRepository'),
+        }
+
+
+class GitRepositoryBulkDeleteView(generic.BulkDeleteView):
+    queryset = GitRepository.objects.all()
+    table = tables.GitRepositoryBulkTable
+
+    def extra_context(self):
+        return {
+            'datasource_contents': get_datasource_contents('extras.GitRepository'),
+        }
+
+
+class GitRepositorySyncView(View):
+    def post(self, request, slug):
+        if not request.user.has_perm('extras.change_gitrepository'):
+            return HttpResponseForbidden()
+
+        repository = get_object_or_404(GitRepository.objects.all(), slug=slug)
+
+        # Allow execution only if RQ worker process is running
+        if not Worker.count(get_connection('default')):
+            messages.error(request, "Unable to sync Git repository: RQ worker process not running.")
+
+        else:
+            enqueue_pull_git_repository_and_refresh_data(repository, request)
+
+        return redirect('extras:gitrepository_result', slug=slug)
+
+
+class GitRepositoryResultView(ContentTypePermissionRequiredMixin, View):
+
+    def get_required_permission(self):
+        return 'extras.view_gitrepository'
+
+    def get(self, request, slug):
+        git_repository_content_type = ContentType.objects.get(app_label='extras', model='gitrepository')
+        git_repository = get_object_or_404(GitRepository.objects.all(), slug=slug)
+        job_result = JobResult.objects.filter(
+            obj_type=git_repository_content_type, name=git_repository.name
+        ).order_by('-created').first()
+        return render(request, 'extras/gitrepository_result.html', {
+            'base_template': 'extras/gitrepository.html',
+            'object': git_repository,
+            'result': job_result,
+            'active_tab': 'result',
+        })
+
+
+#
 # Image attachments
 #
 
@@ -291,7 +426,7 @@ class CustomJobListView(ContentTypePermissionRequiredMixin, View):
         return 'extras.view_customjob'
 
     def get(self, request):
-        custom_jobs = get_custom_jobs()
+        custom_jobs_dict = get_custom_jobs()
         custom_job_content_type = ContentType.objects.get(app_label='extras', model='customjob')
         # Get the newest results for each job name
         results = {
@@ -302,17 +437,24 @@ class CustomJobListView(ContentTypePermissionRequiredMixin, View):
             ).order_by('completed').defer('data')
         }
 
-        ret = []
-        for module, entry in custom_jobs.items():
-            module_custom_jobs = []
-            for custom_job_class in entry['jobs'].values():
-                custom_job = custom_job_class()
-                custom_job.result = results.get(custom_job.full_name, None)
-                module_custom_jobs.append(custom_job)
-            ret.append((entry["name"], module_custom_jobs))
+        # get_custom_jobs() gives us a nested dict {grouping: {module: {"name": name, "jobs": [job, job, job]}}}
+        # But for presentation to the user we want to flatten this to {module_name: [job, job, job]}
+
+        modules_dict = {}
+        for grouping, modules in custom_jobs_dict.items():
+            for module, entry in modules.items():
+                module_custom_jobs = modules_dict.get(entry["name"], [])
+                for custom_job_class in entry['jobs'].values():
+                    custom_job = custom_job_class()
+                    custom_job.result = results.get(custom_job.class_path, None)
+                    module_custom_jobs.append(custom_job)
+                if module_custom_jobs:
+                    # TODO: should we sort module_custom_jobs by job name? Currently they're in source code order
+                    modules_dict[entry["name"]] = module_custom_jobs
 
         return render(request, 'extras/customjob_list.html', {
-            'custom_jobs': ret,
+            # Order the jobs listing by case-insensitive sorting of the module human-readable name
+            'custom_jobs': sorted(modules_dict.items(), key=lambda kvpair: kvpair[0].lower()),
         })
 
 
@@ -324,29 +466,32 @@ class CustomJobView(ContentTypePermissionRequiredMixin, View):
     def get_required_permission(self):
         return 'extras.view_customjob'
 
-    def get(self, request, module, name):
-        custom_job_class = get_custom_job(module, name)
+    def get(self, request, class_path):
+        custom_job_class = get_custom_job(class_path)
         if custom_job_class is None:
             raise Http404
         custom_job = custom_job_class()
+        grouping, module, class_name = class_path.split("/", 2)
 
         form = custom_job.as_form(initial=request.GET)
 
         return render(request, 'extras/customjob.html', {
+            'grouping': grouping,
             'module': module,
             'custom_job': custom_job,
             'form': form,
             # 'run_form': ConfirmationForm(),
         })
 
-    def post(self, request, module, name):
+    def post(self, request, class_path):
         if not request.user.has_perm('extras.run_customjob'):
             return HttpResponseForbidden()
 
-        custom_job_class = get_custom_job(module, name)
+        custom_job_class = get_custom_job(class_path)
         if custom_job_class is None:
             raise Http404
         custom_job = custom_job_class()
+        grouping, module, class_name = class_path.split("/", 2)
         form = custom_job.as_form(request.POST, request.FILES)
 
         # Allow execution only if RQ worker process is running
@@ -360,7 +505,7 @@ class CustomJobView(ContentTypePermissionRequiredMixin, View):
             custom_job_content_type = ContentType.objects.get(app_label='extras', model='customjob')
             job_result = JobResult.enqueue_job(
                 run_custom_job,
-                custom_job.full_name,
+                custom_job.class_path,
                 custom_job_content_type,
                 request.user,
                 data=form.cleaned_data,
@@ -368,33 +513,51 @@ class CustomJobView(ContentTypePermissionRequiredMixin, View):
                 commit=commit,
             )
 
-            return redirect('extras:customjob_result', job_result_pk=job_result.pk)
+            return redirect('extras:customjob_jobresult', pk=job_result.pk)
 
         return render(request, 'extras/customjob.html', {
+            'grouping': grouping,
             'module': module,
             'custom_job': custom_job,
             'form': form,
         })
 
 
-class CustomJobResultListView(generic.ObjectListView):
+class CustomJobResultView(ContentTypePermissionRequiredMixin, View):
     """
-    List JobResults pertaining to the execution of Custom Jobs.
+    Display a JobResult and its CustomJob data.
     """
-    additional_permissions = ["extras.view_customjob"]
 
-    queryset = None
+    def get_required_permission(self):
+        return 'extras.view_jobresult'
+
+    def get(self, request, pk):
+        custom_job_content_type = ContentType.objects.get(app_label='extras', model='customjob')
+        job_result = get_object_or_404(JobResult.objects.all(), pk=pk, obj_type=custom_job_content_type)
+
+        custom_job_class = get_custom_job(job_result.name)
+        if custom_job_class is not None:
+            custom_job = custom_job_class()
+
+        return render(request, 'extras/customjob_result.html', {
+            'custom_job': custom_job,
+            'result': job_result,
+        })
+
+
+#
+# JobResult
+#
+
+class JobResultListView(generic.ObjectListView):
+    """
+    List JobResults
+    """
+    queryset = JobResult.objects.all()
     filterset = filters.JobResultFilterSet
     filterset_form = forms.JobResultFilterForm
     table = tables.JobResultTable
     action_buttons = ()
-    template_name = 'extras/customjob_result_list.html'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        custom_job_content_type = ContentType.objects.get(app_label='extras', model='customjob')
-        self.queryset = JobResult.objects.filter(obj_type=custom_job_content_type).order_by('-created')
 
 
 class JobResultDeleteView(generic.ObjectDeleteView):
@@ -406,27 +569,33 @@ class JobResultBulkDeleteView(generic.BulkDeleteView):
     table = tables.JobResultTable
 
 
-class CustomJobResultView(ContentTypePermissionRequiredMixin, View):
+class JobResultView(ContentTypePermissionRequiredMixin, View):
     """
-    Display a JobResult pertaining to the execution of a Custom Job.
+    Display a JobResult and its data.
     """
+
     def get_required_permission(self):
-        return 'extras.view_customjob'
+        return 'extras.view_jobresult'
 
-    def get(self, request, job_result_pk):
+    def get(self, request, pk):
+        job_result = get_object_or_404(JobResult.objects.all(), pk=pk)
+
+        associated_record = None
+        custom_job = None
         custom_job_content_type = ContentType.objects.get(app_label='extras', model='customjob')
-        job_result = get_object_or_404(JobResult.objects.all(), pk=job_result_pk, obj_type=custom_job_content_type)
-
-        module, job_name = job_result.name.split('.', 1)
-        custom_job_class = get_custom_job(module, job_name)
-        if custom_job_class is not None:
-            custom_job = custom_job_class()
+        if job_result.obj_type == custom_job_content_type:
+            custom_job_class = get_custom_job(job_result.name)
+            if custom_job_class is not None:
+                custom_job = custom_job_class()
         else:
-            custom_job = None
+            model_class = job_result.obj_type.model_class()
+            try:
+                associated_record = model_class.objects.get(name=job_result.name)
+            except model_class.DoesNotExist:
+                pass
 
-        return render(request, 'extras/customjob_result.html', {
-            'module': module,
-            'class_name': job_name,
+        return render(request, 'extras/jobresult.html', {
+            'associated_record': associated_record,
             'custom_job': custom_job,
             'result': job_result,
         })

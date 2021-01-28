@@ -49,6 +49,7 @@ nav:
         - Custom Jobs: 'additional-features/custom-jobs.md'
         - Custom Links: 'additional-features/custom-links.md'
         - Export Templates: 'additional-features/export-templates.md'
+        - Git Repositories: 'models/extras/gitrepository.md'
         - NAPALM: 'additional-features/napalm.md'
         - Prometheus Metrics: 'additional-features/prometheus-metrics.md'
         - Tags: 'models/extras/tag.md'
@@ -65,6 +66,8 @@ nav:
         - Filtering: 'rest-api/filtering.md'
         - Authentication: 'rest-api/authentication.md'
         - Working with Secrets: 'rest-api/working-with-secrets.md'
+    - GraphQL API:
+        - Overview: 'additional-features/graphql.md'
     - Development:
         - Introduction: 'development/index.md'
         - Getting Started: 'development/getting-started.md'
