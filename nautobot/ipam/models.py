@@ -16,6 +16,9 @@ from nautobot.extras.utils import extras_features
 from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
 from nautobot.utilities.utils import array_to_string, serialize_object
 from nautobot.virtualization.models import VirtualMachine, VMInterface
+from nautobot.utilities.fields import JSONArrayField
+from nautobot.utilities.querysets import RestrictedQuerySet
+from nautobot.utilities.utils import array_to_string, serialize_object
 from .choices import *
 from .constants import *
 from .fields import IPNetworkField, IPAddressField
@@ -1068,7 +1071,7 @@ class Service(PrimaryModel):
     )
     name = models.CharField(max_length=100)
     protocol = models.CharField(max_length=50, choices=ServiceProtocolChoices)
-    ports = ArrayField(
+    ports = JSONArrayField(
         base_field=models.PositiveIntegerField(
             validators=[
                 MinValueValidator(SERVICE_PORT_MIN),
