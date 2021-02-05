@@ -33,6 +33,7 @@ ENV_VARS = {
     "PYTHON_VER": PYTHON_VER,
 }
 
+
 # ------------------------------------------------------------------------------
 # BUILD
 # ------------------------------------------------------------------------------
@@ -228,7 +229,9 @@ def pycodestyle(context, python_ver=PYTHON_VER):
     """
     context.run(
         f"{COMPOSE_COMMAND} run netbox"
-        f" sh -c \"cd {GRIMLOCK_ROOT} && pycodestyle --ignore=W504,E501 netbox/\"",
+        f" sh -c \"cd {GRIMLOCK_ROOT} &&"
+        " pycodestyle --ignore=W504,E501 --exclude=netbox/scripts,netbox/reports,netbox/custom_jobs,netbox/git"
+        " contrib/ development/ netbox/ tasks.py\"",
         env={"PYTHON_VER": python_ver},
         pty=True,
     )
