@@ -1,3 +1,4 @@
+dev_addr: '127.0.0.1:8001'
 site_name: NetBox Documentation
 site_url: https://netbox.readthedocs.io/
 repo_url: https://github.com/netbox-community/netbox
@@ -52,6 +53,7 @@ nav:
         - Git Repositories: 'models/extras/gitrepository.md'
         - NAPALM: 'additional-features/napalm.md'
         - Prometheus Metrics: 'additional-features/prometheus-metrics.md'
+        - Statuses: 'models/extras/status.md'
         - Tags: 'models/extras/tag.md'
         - Webhooks: 'additional-features/webhooks.md'
     - Plugins:

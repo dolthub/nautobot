@@ -4,14 +4,14 @@ from django.apps import AppConfig
 from django.db.utils import ProgrammingError
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('netbox.extras.apps')
 
 
 class ExtrasConfig(AppConfig):
     name = "extras"
 
     def ready(self):
-        import extras.signals
+        import extras.signals  # noqa
         from extras.plugins.validators import wrap_model_clean_methods
 
         try:
