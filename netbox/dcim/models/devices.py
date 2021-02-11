@@ -14,7 +14,7 @@ from taggit.managers import TaggableManager
 from dcim.choices import *
 from dcim.constants import *
 from extras.models import (
-    ChangeLoggedModel, ConfigContextModel, CustomFieldModel, StatusModel, TaggedItem,
+    ChangeLoggedModel, ConfigContextModel, CustomFieldModel, RelationshipModel, StatusModel, TaggedItem,
 )
 from extras.querysets import ConfigContextModelQuerySet
 from extras.utils import extras_features
@@ -43,9 +43,10 @@ __all__ = (
     'custom_validators',
     'export_templates',
     'graphql',
+    'relationships',
     'webhooks'
 )
-class Manufacturer(ChangeLoggedModel, CustomFieldModel):
+class Manufacturer(ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """
     A Manufacturer represents a company which produces hardware devices; for example, Juniper or Dell.
     """
@@ -89,9 +90,10 @@ class Manufacturer(ChangeLoggedModel, CustomFieldModel):
     'custom_validators',
     'export_templates',
     'graphql',
+    'relationships',
     'webhooks'
 )
-class DeviceType(ChangeLoggedModel, CustomFieldModel):
+class DeviceType(ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """
     A DeviceType represents a particular make (Manufacturer) and model of device. It specifies rack height and depth, as
     well as high-level functional role(s).
@@ -356,9 +358,10 @@ class DeviceType(ChangeLoggedModel, CustomFieldModel):
 @extras_features(
     'custom_fields',
     'custom_validators',
+    'relationships',
     'graphql'
 )
-class DeviceRole(ChangeLoggedModel, CustomFieldModel):
+class DeviceRole(ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """
     Devices are organized by functional role; for example, "Core Switch" or "File Server". Each DeviceRole is assigned a
     color to be used when displaying rack elevations. The vm_role field determines whether the role is applicable to
@@ -408,9 +411,10 @@ class DeviceRole(ChangeLoggedModel, CustomFieldModel):
 @extras_features(
     'custom_fields',
     'custom_validators',
+    'relationships',
     'graphql'
 )
-class Platform(ChangeLoggedModel, CustomFieldModel):
+class Platform(ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """
     Platform refers to the software or firmware running on a Device. For example, "Cisco IOS-XR" or "Juniper Junos".
     NetBox uses Platforms to determine how to interact with devices when pulling inventory data or other information by
@@ -479,10 +483,11 @@ class Platform(ChangeLoggedModel, CustomFieldModel):
     'custom_validators',
     'export_templates',
     'graphql',
+    'relationships',
     'statuses',
     'webhooks'
 )
-class Device(ChangeLoggedModel, ConfigContextModel, CustomFieldModel, StatusModel):
+class Device(ChangeLoggedModel, ConfigContextModel, CustomFieldModel, RelationshipModel, StatusModel):
     """
     A Device represents a piece of physical hardware mounted within a Rack. Each Device is assigned a DeviceType,
     DeviceRole, and (optionally) a Platform. Device names are not required, however if one is set it must be unique.
@@ -912,9 +917,10 @@ class Device(ChangeLoggedModel, ConfigContextModel, CustomFieldModel, StatusMode
     'custom_validators',
     'export_templates',
     'graphql',
+    'relationships',
     'webhooks'
 )
-class VirtualChassis(ChangeLoggedModel, CustomFieldModel):
+class VirtualChassis(ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """
     A collection of Devices which operate with a shared control plane (e.g. a switch stack).
     """

@@ -8,7 +8,14 @@ from timezone_field import TimeZoneField
 from dcim.choices import *
 from dcim.constants import *
 from dcim.fields import ASNField
-from extras.models import ChangeLoggedModel, CustomFieldModel, ObjectChange, TaggedItem
+from extras.models import (
+    ChangeLoggedModel,
+    CustomFieldModel,
+    ObjectChange,
+    RelationshipModel,
+    StatusModel,
+    TaggedItem
+)
 from extras.utils import extras_features
 from utilities.fields import NaturalOrderingField
 from utilities.querysets import RestrictedQuerySet
@@ -29,9 +36,11 @@ __all__ = (
     'custom_fields',
     'custom_validators',
     'export_templates',
+    'graphql',
+    'relationships',
     'webhooks'
 )
-class Region(MPTTModel, ChangeLoggedModel, CustomFieldModel):
+class Region(MPTTModel, ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """
     Sites can be grouped within geographic Regions.
     """
@@ -103,9 +112,11 @@ class Region(MPTTModel, ChangeLoggedModel, CustomFieldModel):
     'export_templates',
     'custom_validators',
     'graphql',
+    'relationships',
+    'statuses',
     'webhooks'
 )
-class Site(ChangeLoggedModel, CustomFieldModel):
+class Site(ChangeLoggedModel, CustomFieldModel, RelationshipModel, StatusModel):
     """
     A Site represents a geographic location within a network; typically a building or campus. The optional facility
     field can be used to include an external designation, such as a data center name (e.g. Equinix SV6).
@@ -122,11 +133,6 @@ class Site(ChangeLoggedModel, CustomFieldModel):
     slug = models.SlugField(
         max_length=100,
         unique=True
-    )
-    status = models.CharField(
-        max_length=50,
-        choices=SiteStatusChoices,
-        default=SiteStatusChoices.STATUS_ACTIVE
     )
     region = models.ForeignKey(
         to='dcim.Region',
@@ -242,6 +248,3 @@ class Site(ChangeLoggedModel, CustomFieldModel):
             self.contact_email,
             self.comments,
         )
-
-    def get_status_class(self):
-        return SiteStatusChoices.CSS_CLASSES.get(self.status)

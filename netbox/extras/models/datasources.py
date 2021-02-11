@@ -11,6 +11,7 @@ from django_cryptography.fields import encrypt
 from extras.models.change_logging import ChangeLoggedModel
 from extras.models.customfields import CustomFieldModel
 from extras.models.models import ConfigContext, ExportTemplate
+from extras.models.relationships import RelationshipModel
 from extras.utils import extras_features
 from utilities.querysets import RestrictedQuerySet
 
@@ -20,8 +21,9 @@ from utilities.querysets import RestrictedQuerySet
     'custom_fields',
     'export_template_owners',
     'job_results',
+    'relationships',
 )
-class GitRepository(ChangeLoggedModel, CustomFieldModel):
+class GitRepository(ChangeLoggedModel, CustomFieldModel, RelationshipModel):
     """Representation of a Git repository used as an external data source."""
 
     TOKEN_PLACEHOLDER = "********"
@@ -124,7 +126,7 @@ class GitRepository(ChangeLoggedModel, CustomFieldModel):
                 # have its own clone of this repository on its own local filesystem; we need some way to ensure
                 # that all such clones are renamed.
                 # For now we just rename the one that we have locally and rely on other methods
-                # (notably get_custom_jobs()) to clean up other clones as they're encountered.
+                # (notably get_jobs()) to clean up other clones as they're encountered.
                 if os.path.exists(os.path.join(settings.GIT_ROOT, self.__initial_slug)):
                     os.rename(os.path.join(settings.GIT_ROOT, self.__initial_slug), self.filesystem_path)
 

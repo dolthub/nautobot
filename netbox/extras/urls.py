@@ -48,10 +48,10 @@ urlpatterns = [
     path('changelog/', views.ObjectChangeListView.as_view(), name='objectchange_list'),
     path('changelog/<int:pk>/', views.ObjectChangeView.as_view(), name='objectchange'),
 
-    # Custom jobs
-    path('custom-jobs/', views.CustomJobListView.as_view(), name='customjob_list'),
-    path('custom-jobs/results/<int:pk>/', views.CustomJobResultView.as_view(), name='customjob_jobresult'),
-    path('custom-jobs/<path:class_path>/', views.CustomJobView.as_view(), name='customjob'),
+    # Jobs
+    path('jobs/', views.JobListView.as_view(), name='job_list'),
+    path('jobs/results/<int:pk>/', views.JobJobResultView.as_view(), name='job_jobresult'),
+    path('jobs/<path:class_path>/', views.JobView.as_view(), name='job'),
 
     # Generic job results
     path('job-results/', views.JobResultListView.as_view(), name='jobresult_list'),
@@ -69,4 +69,12 @@ urlpatterns = [
     path('statuses/<int:pk>/edit/', views.StatusEditView.as_view(), name='status_edit'),
     path('statuses/<int:pk>/delete/', views.StatusDeleteView.as_view(), name='status_delete'),
     path('statuses/<int:pk>/changelog/', views.ObjectChangeLogView.as_view(), name='status_changelog', kwargs={'model': Status}),
+
+    # Custom relationships
+    path('relationships/', views.RelationshipListView.as_view(), name='relationship_list'),
+    path('relationships/add/', views.RelationshipEditView.as_view(), name='relationship_add'),
+    path('relationships/<int:pk>/edit/', views.RelationshipEditView.as_view(), name='relationship_edit'),
+    path('relationships/<int:pk>/delete/', views.RelationshipDeleteView.as_view(), name='relationship_delete'),
+    path('relationships/associations/', views.RelationshipAssociationListView.as_view(), name='relationshipassociation_list'),
+    path('relationships/associations/<int:pk>/delete/', views.RelationshipAssociationDeleteView.as_view(), name='relationshipassociation_delete'),
 ]

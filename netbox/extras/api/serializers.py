@@ -11,8 +11,8 @@ from dcim.models import Device, DeviceRole, Platform, Rack, Region, Site
 from extras.choices import *
 from extras.datasources import get_datasource_content_choices
 from extras.models import (
-    ConfigContext, CustomField, ExportTemplate, GitRepository, ImageAttachment,
-    ObjectChange, JobResult, Status, Tag,
+    ConfigContext, CustomField, ExportTemplate, GitRepository, ImageAttachment, JobResult,
+    ObjectChange, Relationship, RelationshipAssociation, Status, Tag,
 )
 from extras.api.fields import StatusSerializerField
 from extras.utils import FeatureQuery
@@ -354,12 +354,12 @@ class JobResultSerializer(serializers.ModelSerializer):
 
 
 #
-# Custom jobs (fka Scripts, Reports)
+# Jobs (fka Custom Scripts, Reports)
 #
 
-class CustomJobSerializer(serializers.Serializer):
+class JobSerializer(serializers.Serializer):
     url = serializers.HyperlinkedIdentityField(
-        view_name='extras-api:customjob-detail',
+        view_name='extras-api:job-detail',
         lookup_field='class_path',
         lookup_url_kwarg='class_path',
     )
@@ -376,11 +376,11 @@ class CustomJobSerializer(serializers.Serializer):
         }
 
 
-class CustomJobDetailSerializer(CustomJobSerializer):
+class JobDetailSerializer(JobSerializer):
     result = JobResultSerializer()
 
 
-class CustomJobInputSerializer(serializers.Serializer):
+class JobInputSerializer(serializers.Serializer):
     data = serializers.JSONField(required=False, default="")
     commit = serializers.BooleanField(required=False, default=None)
 
@@ -477,3 +477,53 @@ class StatusSerializer(ValidatedModelSerializer):
 class StatusModelSerializerMixin(serializers.Serializer):
     """Mixin to add non-required `status` choice field to model serializers."""
     status = StatusSerializerField(required=False, queryset=Status.objects.all())
+
+
+#
+# Relationship
+#
+
+class RelationshipSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='extras-api:relationship-detail')
+
+    source_type = ContentTypeField(
+        queryset=ContentType.objects.filter(
+            FeatureQuery('relationships').get_query()
+        ),
+    )
+
+    destination_type = ContentTypeField(
+        queryset=ContentType.objects.filter(
+            FeatureQuery('relationships').get_query()
+        ),
+    )
+
+    class Meta:
+        model = Relationship
+        fields = [
+            'id', 'url', 'name', 'slug', 'description', 'type', 'source_type', 'source_label', 'source_hidden', 'source_filter',
+            'destination_type', 'destination_label', 'destination_hidden', 'destination_filter',
+        ]
+
+
+class RelationshipAssociationSerializer(serializers.ModelSerializer):
+
+    source_type = ContentTypeField(
+        queryset=ContentType.objects.filter(
+            FeatureQuery('relationships').get_query()
+        ),
+    )
+
+    destination_type = ContentTypeField(
+        queryset=ContentType.objects.filter(
+            FeatureQuery('relationships').get_query()
+        ),
+    )
+
+    relationship = NestedRelationshipSerializer()
+
+    class Meta:
+        model = RelationshipAssociation
+        fields = [
+            'id', 'relationship', 'source_type', 'source_id', 'destination_type', 'destination_id'
+        ]
