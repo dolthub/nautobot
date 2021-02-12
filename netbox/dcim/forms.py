@@ -3517,9 +3517,11 @@ class ConnectCableToDeviceForm(BootstrapMixin, CustomFieldModelForm):
             'termination_b_id', 'type', 'status', 'label', 'color', 'length', 'length_unit', 'tags',
         ]
         widgets = {
-            'status': StaticSelect2,
             'type': StaticSelect2,
             'length_unit': StaticSelect2,
+        }
+        help_texts = {
+            'status': 'Connection status',
         }
 
     def clean_termination_b_id(self):
@@ -3728,7 +3730,6 @@ class CableForm(BootstrapMixin, CustomFieldModelForm):
             'type', 'status', 'label', 'color', 'length', 'length_unit', 'tags',
         ]
         widgets = {
-            'status': StaticSelect2,
             'type': StaticSelect2,
             'length_unit': StaticSelect2,
         }
@@ -3739,7 +3740,7 @@ class CableForm(BootstrapMixin, CustomFieldModelForm):
         }
 
 
-class CableCSVForm(CustomFieldModelCSVForm):
+class CableCSVForm(StatusModelCSVFormMixin, CustomFieldModelCSVForm):
     # Termination A
     side_a_device = CSVModelChoiceField(
         queryset=Device.objects.all(),
@@ -3771,11 +3772,6 @@ class CableCSVForm(CustomFieldModelCSVForm):
     )
 
     # Cable attributes
-    status = CSVChoiceField(
-        choices=CableStatusChoices,
-        required=False,
-        help_text='Connection status'
-    )
     type = CSVChoiceField(
         choices=CableTypeChoices,
         required=False,
@@ -3795,6 +3791,7 @@ class CableCSVForm(CustomFieldModelCSVForm):
         ]
         help_texts = {
             'color': mark_safe('RGB color in hexadecimal (e.g. <code>00ff00</code>)'),
+            'status': 'Connection status',
         }
 
     def _clean_side(self, side):
@@ -3834,7 +3831,12 @@ class CableCSVForm(CustomFieldModelCSVForm):
         return length_unit if length_unit is not None else ''
 
 
-class CableBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditForm):
+class CableBulkEditForm(
+    BootstrapMixin,
+    AddRemoveTagsForm,
+    StatusBulkEditFormMixin,
+    CustomFieldBulkEditForm
+):
     pk = forms.ModelMultipleChoiceField(
         queryset=Cable.objects.all(),
         widget=forms.MultipleHiddenInput
@@ -3844,12 +3846,6 @@ class CableBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditFo
         required=False,
         initial='',
         widget=StaticSelect2()
-    )
-    status = forms.ChoiceField(
-        choices=add_blank_choice(CableStatusChoices),
-        required=False,
-        widget=StaticSelect2(),
-        initial=''
     )
     label = forms.CharField(
         max_length=100,
@@ -3888,7 +3884,7 @@ class CableBulkEditForm(BootstrapMixin, AddRemoveTagsForm, CustomFieldBulkEditFo
             })
 
 
-class CableFilterForm(BootstrapMixin, forms.Form):
+class CableFilterForm(BootstrapMixin, StatusFilterFormMixin, forms.Form):
     model = Cable
     q = forms.CharField(
         required=False,
@@ -3924,11 +3920,6 @@ class CableFilterForm(BootstrapMixin, forms.Form):
     type = forms.MultipleChoiceField(
         choices=add_blank_choice(CableTypeChoices),
         required=False,
-        widget=StaticSelect2()
-    )
-    status = forms.ChoiceField(
-        required=False,
-        choices=add_blank_choice(CableStatusChoices),
         widget=StaticSelect2()
     )
     color = forms.CharField(

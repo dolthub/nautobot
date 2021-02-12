@@ -1460,13 +1460,23 @@ class CableTest(APIViewTestCases.APIViewTestCase):
                 interfaces.append(Interface(device=device, type=InterfaceTypeChoices.TYPE_1GE_FIXED, name=f'eth{i}'))
         Interface.objects.bulk_create(interfaces)
 
+        statuses = Status.objects.get_for_model(Cable)
+
         cables = (
-            Cable(termination_a=interfaces[0], termination_b=interfaces[10], label='Cable 1'),
-            Cable(termination_a=interfaces[1], termination_b=interfaces[11], label='Cable 2'),
-            Cable(termination_a=interfaces[2], termination_b=interfaces[12], label='Cable 3'),
+            Cable(termination_a=interfaces[0], termination_b=interfaces[10], label='Cable 1', status=statuses[0]),
+            Cable(termination_a=interfaces[1], termination_b=interfaces[11], label='Cable 2', status=statuses[0]),
+            Cable(termination_a=interfaces[2], termination_b=interfaces[12], label='Cable 3', status=statuses[0]),
         )
         for cable in cables:
             cable.save()
+
+        # FIXME(jathan): The writable serializer for `status` takes the
+        # status `name` (str) and not the `pk` (int). Do not validate this
+        # field right now, since we are asserting that it does create correctly.
+        #
+        # The test code for utilities.testing.views.TestCase.model_to_dict()`
+        # needs to be enhanced to use the actual API serializers when `api=True`
+        cls.validation_excluded_fields = ['status']
 
         cls.create_data = [
             {
@@ -1474,6 +1484,7 @@ class CableTest(APIViewTestCases.APIViewTestCase):
                 'termination_a_id': interfaces[4].pk,
                 'termination_b_type': 'dcim.interface',
                 'termination_b_id': interfaces[14].pk,
+                'status': statuses[1].name,
                 'label': 'Cable 4',
             },
             {
@@ -1481,6 +1492,7 @@ class CableTest(APIViewTestCases.APIViewTestCase):
                 'termination_a_id': interfaces[5].pk,
                 'termination_b_type': 'dcim.interface',
                 'termination_b_id': interfaces[15].pk,
+                'status': statuses[1].name,
                 'label': 'Cable 5',
             },
             {
@@ -1488,6 +1500,7 @@ class CableTest(APIViewTestCases.APIViewTestCase):
                 'termination_a_id': interfaces[6].pk,
                 'termination_b_type': 'dcim.interface',
                 'termination_b_id': interfaces[16].pk,
+                'status': statuses[1].name,
                 'label': 'Cable 6',
             },
         ]
