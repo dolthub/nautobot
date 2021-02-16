@@ -131,6 +131,7 @@ class DeviceTable(StatusTableMixin, BaseTable):
     )
     primary_ip = tables.Column(
         linkify=True,
+        order_by=('primary_ip6', 'primary_ip4'),
         verbose_name='IP Address'
     )
     primary_ip4 = tables.Column(
@@ -408,6 +409,7 @@ class BaseInterfaceTable(BaseTable):
 
 
 class InterfaceTable(DeviceComponentTable, BaseInterfaceTable, PathEndpointTable):
+    mgmt_only = BooleanColumn()
     tags = TagColumn(
         url_name='dcim:interface_list'
     )

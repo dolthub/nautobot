@@ -19,7 +19,7 @@ from extras.plugins.utils import load_plugins, get_sso_backend_name
 #
 
 # FIXME(jathan): This should be defined in package metadata, not settings.
-VERSION = '2.10.3'
+VERSION = '2.10.4'
 
 # Hostname of the system. This is displayed in the web UI footers along with the
 # version.
