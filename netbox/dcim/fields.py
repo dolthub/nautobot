@@ -54,6 +54,45 @@ class MACAddressField(models.Field):
         return str(self.to_python(value))
 
 
+class MACAddressCharField(models.CharField):
+    description = "MAC Address Varchar field"
+
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = 18
+        super().__init__(*args, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        del kwargs["max_length"]
+        return name, path, args, kwargs
+
+    def python_type(self):
+        return EUI
+
+    @property
+    def validators(self):
+        # rely on db to validate len
+        return []
+
+    def from_db_value(self, value, expression, connection):
+        return self.to_python(value)
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        if isinstance(value, str):
+            value = value.strip()
+        try:
+            return EUI(value, version=48, dialect=mac_unix_expanded_uppercase)
+        except AddrFormatError as e:
+            raise ValidationError("Invalid MAC address format: {}".format(value))
+
+    def get_prep_value(self, value):
+        if not value:
+            return None
+        return str(self.to_python(value))
+
+
 class PathField(ArrayField):
     """
     An ArrayField which holds a set of objects, each identified by a (type, ID) tuple.
