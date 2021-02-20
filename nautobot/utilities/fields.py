@@ -2,8 +2,7 @@ import json
 
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models.fields import mixins
-from django.core import checks, exceptions
+from django.core import exceptions
 
 from nautobot.utilities.ordering import naturalize
 from .forms import ColorSelect
