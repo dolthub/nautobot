@@ -29,7 +29,6 @@ if os.path.isfile(COMPOSE_OVERRIDE_FILE):
     COMPOSE_COMMAND += f' -f "{COMPOSE_OVERRIDE_FILE}"'
 
 NAUTOBOT_ROOT = "/opt/nautobot/"
-MANAGE_COMMAND = os.path.join(NAUTOBOT_ROOT, "nautobot_root/manage.py")
 
 
 # ------------------------------------------------------------------------------
@@ -137,7 +136,7 @@ def nbshell(context, python_ver=PYTHON_VER):
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
-        f"{COMPOSE_COMMAND} exec nautobot python {MANAGE_COMMAND} nbshell",
+        f"{COMPOSE_COMMAND} exec nautobot nautobot-server nbshell",
         env={"PYTHON_VER": python_ver},
         pty=True,
     )
@@ -166,7 +165,7 @@ def createsuperuser(context, user="admin", python_ver=PYTHON_VER):
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
-        f"{COMPOSE_COMMAND} run nautobot python {MANAGE_COMMAND} createsuperuser --username {user}",
+        f"{COMPOSE_COMMAND} run nautobot nautobot-server createsuperuser --username {user}",
         env={"PYTHON_VER": python_ver},
         pty=True,
     )
@@ -183,12 +182,12 @@ def makemigrations(context, name="", python_ver=PYTHON_VER):
     """
     if name:
         context.run(
-            f"{COMPOSE_COMMAND} run nautobot python {MANAGE_COMMAND} makemigrations --name {name}",
+            f"{COMPOSE_COMMAND} run nautobot nautobot-server makemigrations --name {name}",
             env={"PYTHON_VER": python_ver},
         )
     else:
         context.run(
-            f"{COMPOSE_COMMAND} run nautobot python {MANAGE_COMMAND} makemigrations",
+            f"{COMPOSE_COMMAND} run nautobot nautobot-server makemigrations",
             env={"PYTHON_VER": python_ver},
         )
 
@@ -202,7 +201,7 @@ def migrate(context, python_ver=PYTHON_VER):
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
-        f"{COMPOSE_COMMAND} run nautobot python {MANAGE_COMMAND} migrate",
+        f"{COMPOSE_COMMAND} run nautobot nautobot-server migrate",
         env={"PYTHON_VER": python_ver},
     )
 
@@ -239,7 +238,7 @@ def coverage_run(context, dir="nautobot_root/", python_ver=PYTHON_VER):
     """
     context.run(
         f"{COMPOSE_COMMAND} run nautobot"
-        f" coverage run --source='nautobot_root/' nautobot_root/manage.py test {dir}",
+        f" coverage run --source='nautobot_root/' scripts/test_runner.py test {dir}",
         env={"PYTHON_VER": python_ver},
         pty=True,
     )
