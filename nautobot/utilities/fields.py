@@ -99,8 +99,9 @@ class JSONArrayField(models.JSONField):
         return 'JSON Array of %s' % self.base_field.description
 
     def get_prep_value(self, value):
-        if not isinstance(value, (list, tuple)):
-            raise ValueError("value {} is not list or tuple".format(value))
+        if value is not None:
+            if not isinstance(value, (list, tuple)):
+                raise ValueError("value {} is not list or tuple".format(value))
         return super().get_prep_value(value)
 
     def deconstruct(self):
