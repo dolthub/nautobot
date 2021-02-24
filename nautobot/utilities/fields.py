@@ -102,7 +102,7 @@ class JSONArrayField(models.JSONField):
         if value is not None:
             if not isinstance(value, (list, tuple)):
                 raise ValueError("value {} is not list or tuple".format(value))
-        value = [self.base_field.get_prep_value(v) for v in value]
+            value = [self.base_field.get_prep_value(v) for v in value]
         return super().get_prep_value(value)
 
     def deconstruct(self):
