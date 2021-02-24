@@ -92,7 +92,7 @@ class TestCase(_TestCase):
             else:
 
                 # Convert ArrayFields to CSV strings
-                if type(instance._meta.get_field(key)) is ArrayField:
+                if type(field) is ArrayField:
                     model_dict[key] = ",".join([str(v) for v in value])
 
         return model_dict
