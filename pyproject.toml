@@ -58,6 +58,7 @@ psycopg2-binary = "~2.8.6"
 pycryptodome = "~3.10.1"
 PyYAML = "~5.4.1"
 svgwrite = "~1.4.1"
+mysqlclient = "^2.0.3"
 
 [tool.poetry.dev-dependencies]
 pycodestyle = "~2.6.0"
