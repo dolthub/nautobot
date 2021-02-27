@@ -1,7 +1,7 @@
 from django.db.models import OuterRef, Subquery, Q
 
 from nautobot.extras.models.tags import TaggedItem
-from nautobot.utilities.query_functions import EmptyGroupByJSONBAgg, OrderableJSONBAgg
+from nautobot.utilities.query_functions import EmptyGroupByJSONBAgg, OrderableJSONBAgg, JSONBAgg
 from nautobot.utilities.querysets import RestrictedQuerySet
 
 
@@ -49,7 +49,8 @@ class ConfigContextQuerySet(RestrictedQuerySet):
         )
 
         if aggregate_data:
-            return queryset.aggregate(config_context_data=OrderableJSONBAgg("data", ordering=["weight", "name"]))[
+            # return queryset.aggregate(config_context_data=OrderableJSONBAgg("data", ordering=["weight", "name"]))[
+            return queryset.aggregate(config_context_data=JSONBAgg("data"))[
                 "config_context_data"
             ]
 

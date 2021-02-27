@@ -253,14 +253,20 @@ SWAGGER_SETTINGS = {
 # still be overloaded in custom settings.
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
 DATABASES = {
-    "default": {
-        "NAME": os.getenv("NAUTOBOT_DATABASE", "nautobot"),
-        "USER": os.getenv("NAUTOBOT_USER", ""),
-        "PASSWORD": os.getenv("NAUTOBOT_PASSWORD", ""),
-        "HOST": os.getenv("NAUTOBOT_DB_HOST", "localhost"),
-        "PORT": os.getenv("NAUTOBOT_DB_PORT", ""),
-        "CONN_MAX_AGE": os.getenv("NAUTOBOT_DB_TIMEOUT", 300),
-        "ENGINE": "django.db.backends.postgresql",
+    # "default": {
+    #     "NAME": os.getenv("NAUTOBOT_DATABASE", "nautobot"),
+    #     "USER": os.getenv("NAUTOBOT_USER", ""),
+    #     "PASSWORD": os.getenv("NAUTOBOT_PASSWORD", ""),
+    #     "HOST": os.getenv("NAUTOBOT_DB_HOST", "localhost"),
+    #     "PORT": os.getenv("NAUTOBOT_DB_PORT", ""),
+    #     "CONN_MAX_AGE": os.getenv("NAUTOBOT_DB_TIMEOUT", 300),
+    #     "ENGINE": "django.db.backends.postgresql",
+    # }
+    'default': {
+        'NAME': os.getenv('NAUTOBOT_DATABASE', 'nautobot'),
+        'USER': os.getenv('NAUTOBOT_MYSQL_USER', 'root'),
+        'PASSWORD': os.getenv('NAUTOBOT_MYSQL_PASSWORD', 'toor'),
+        'ENGINE': 'django.db.backends.mysql',
     }
 }
 
