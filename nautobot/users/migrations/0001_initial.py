@@ -134,10 +134,10 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=100)),
                 ("description", models.CharField(blank=True, max_length=200)),
                 ("enabled", models.BooleanField(default=True)),
-                (
-                    "actions",
-                    django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=30), size=None),
-                ),
+                # (
+                #     "actions",
+                #     django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=30), size=None),
+                # ),
                 (
                     "constraints",
                     models.JSONField(

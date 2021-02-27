@@ -16,10 +16,10 @@ class Migration(migrations.Migration):
             name='prefix',
             options={'ordering': (django.db.models.expressions.OrderBy(django.db.models.expressions.F('vrf'), nulls_first=True), 'network', 'prefix_length', 'pk'), 'verbose_name_plural': 'prefixes'},
         ),
-        migrations.RemoveField(
-            model_name='prefix',
-            name='prefix',
-        ),
+        # migrations.RemoveField(
+        #     model_name='prefix',
+        #     name='prefix',
+        # ),
         migrations.AddField(
             model_name='prefix',
             name='broadcast',

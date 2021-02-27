@@ -11,10 +11,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='cablepath',
-            name='path',
-        ),
+        # migrations.RemoveField(
+        #     model_name='cablepath',
+        #     name='path',
+        # ),
         migrations.AddField(
             model_name='cablepath',
             name='path',

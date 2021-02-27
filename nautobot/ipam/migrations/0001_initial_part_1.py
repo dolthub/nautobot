@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                         encoder=django.core.serializers.json.DjangoJSONEncoder,
                     ),
                 ),
-                ("prefix", nautobot.ipam.fields.IPNetworkField()),
+                # ("prefix", nautobot.ipam.fields.IPNetworkField()),
                 ("date_added", models.DateField(blank=True, null=True)),
                 ("description", models.CharField(blank=True, max_length=200)),
             ],
@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
                         encoder=django.core.serializers.json.DjangoJSONEncoder,
                     ),
                 ),
-                ("address", nautobot.ipam.fields.IPAddressField()),
+                # ("address", nautobot.ipam.fields.IPAddressField()),
                 ("role", models.CharField(blank=True, max_length=50)),
                 ("assigned_object_id", models.UUIDField(blank=True, null=True)),
                 (
@@ -125,7 +125,7 @@ class Migration(migrations.Migration):
                         encoder=django.core.serializers.json.DjangoJSONEncoder,
                     ),
                 ),
-                ("prefix", nautobot.ipam.fields.IPNetworkField()),
+                # ("prefix", nautobot.ipam.fields.IPNetworkField()),
                 ("is_pool", models.BooleanField(default=False)),
                 ("description", models.CharField(blank=True, max_length=200)),
             ],
@@ -454,18 +454,18 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=100)),
                 ("protocol", models.CharField(max_length=50)),
-                (
-                    "ports",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.PositiveIntegerField(
-                            validators=[
-                                django.core.validators.MinValueValidator(1),
-                                django.core.validators.MaxValueValidator(65535),
-                            ]
-                        ),
-                        size=None,
-                    ),
-                ),
+                # (
+                #     "ports",
+                #     django.contrib.postgres.fields.ArrayField(
+                #         base_field=models.PositiveIntegerField(
+                #             validators=[
+                #                 django.core.validators.MinValueValidator(1),
+                #                 django.core.validators.MaxValueValidator(65535),
+                #             ]
+                #         ),
+                #         size=None,
+                #     ),
+                # ),
                 ("description", models.CharField(blank=True, max_length=200)),
                 (
                     "device",

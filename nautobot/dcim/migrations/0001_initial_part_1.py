@@ -83,10 +83,10 @@ class Migration(migrations.Migration):
                 ),
                 ("origin_id", models.UUIDField()),
                 ("destination_id", models.UUIDField(blank=True, null=True)),
-                (
-                    "path",
-                    nautobot.dcim.fields.PathField(base_field=models.CharField(max_length=40), size=None),
-                ),
+                # (
+                #     "path",
+                #     nautobot.dcim.fields.PathField(base_field=models.CharField(max_length=40), size=None),
+                # ),
                 ("is_active", models.BooleanField(default=False)),
                 ("is_split", models.BooleanField(default=False)),
             ],
@@ -639,12 +639,12 @@ class Migration(migrations.Migration):
                 ("type", models.CharField(max_length=50)),
                 ("mgmt_only", models.BooleanField(default=False)),
             ],
-            options={
-                "ordering": (
-                    "device",
-                    nautobot.utilities.query_functions.CollateAsChar("_name"),
-                ),
-            },
+            # options={
+            #     "ordering": (
+            #         "device",
+            #         nautobot.utilities.query_functions.CollateAsChar("_name"),
+            #     ),
+            # },
         ),
         migrations.CreateModel(
             name="InterfaceTemplate",
@@ -1214,10 +1214,10 @@ class Migration(migrations.Migration):
                         encoder=django.core.serializers.json.DjangoJSONEncoder,
                     ),
                 ),
-                (
-                    "units",
-                    django.contrib.postgres.fields.ArrayField(base_field=models.PositiveSmallIntegerField(), size=None),
-                ),
+                # (
+                #     "units",
+                #     django.contrib.postgres.fields.ArrayField(base_field=models.PositiveSmallIntegerField(), size=None),
+                # ),
                 ("description", models.CharField(max_length=200)),
             ],
             options={

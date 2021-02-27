@@ -381,10 +381,10 @@ class Migration(migrations.Migration):
             ],
             options={
                 "verbose_name": "interface",
-                "ordering": (
-                    "virtual_machine",
-                    nautobot.utilities.query_functions.CollateAsChar("_name"),
-                ),
+                # "ordering": (
+                #     "virtual_machine",
+                #     nautobot.utilities.query_functions.CollateAsChar("_name"),
+                # ),
                 "unique_together": {("virtual_machine", "name")},
             },
         ),

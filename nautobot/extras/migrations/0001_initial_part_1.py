@@ -671,15 +671,15 @@ class Migration(migrations.Migration):
                         validators=[nautobot.utilities.validators.validate_regex],
                     ),
                 ),
-                (
-                    "choices",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=100),
-                        blank=True,
-                        null=True,
-                        size=None,
-                    ),
-                ),
+                # (
+                #     "choices",
+                #     django.contrib.postgres.fields.ArrayField(
+                #         base_field=models.CharField(max_length=100),
+                #         blank=True,
+                #         null=True,
+                #         size=None,
+                #     ),
+                # ),
                 (
                     "content_types",
                     models.ManyToManyField(

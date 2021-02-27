@@ -15,10 +15,10 @@ class Migration(migrations.Migration):
             name='ipaddress',
             options={'ordering': ('host', 'prefix_length', 'pk'), 'verbose_name': 'IP address', 'verbose_name_plural': 'IP addresses'},
         ),
-        migrations.RemoveField(
-            model_name='ipaddress',
-            name='address',
-        ),
+        # migrations.RemoveField(
+        #     model_name='ipaddress',
+        #     name='address',
+        # ),
         migrations.AddField(
             model_name='ipaddress',
             name='broadcast',

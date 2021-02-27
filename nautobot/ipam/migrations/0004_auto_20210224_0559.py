@@ -15,10 +15,10 @@ class Migration(migrations.Migration):
             name='aggregate',
             options={'ordering': ('network', 'broadcast', 'pk')},
         ),
-        migrations.RemoveField(
-            model_name='aggregate',
-            name='prefix',
-        ),
+        # migrations.RemoveField(
+        #     model_name='aggregate',
+        #     name='prefix',
+        # ),
         migrations.AddField(
             model_name='aggregate',
             name='broadcast',

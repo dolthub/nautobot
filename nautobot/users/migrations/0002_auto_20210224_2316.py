@@ -11,11 +11,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='objectpermission',
-            name='actions',
-            field=nautobot.utilities.fields.JSONArrayField(base_field=models.CharField(max_length=30)),
-        ),
+        # migrations.RemoveField(
+        #     model_name='objectpermission',
+        #     name='actions',
+        #     field=nautobot.utilities.fields.JSONArrayField(base_field=models.CharField(max_length=30)),
+        # ),
         migrations.AddField(
             model_name='objectpermission',
             name='actions',
