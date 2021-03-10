@@ -220,10 +220,9 @@ class Aggregate(PrimaryModel):
     network = VarbinaryIPField(
         null=False,
         db_index=True,
-        max_length=16,
         help_text="IPv4 or IPv6 network address",
     )
-    broadcast = VarbinaryIPField(null=False, db_index=True, max_length=16, help_text="IPv4 or IPv6 broadcast address")
+    broadcast = VarbinaryIPField(null=False, db_index=True, help_text="IPv4 or IPv6 broadcast address")
     prefix_length = models.IntegerField(null=False, db_index=True, help_text="Length of the Network prefix, in bits.")
     rir = models.ForeignKey(
         to="ipam.RIR",
@@ -410,10 +409,9 @@ class Prefix(PrimaryModel, StatusModel):
     network = VarbinaryIPField(
         null=False,
         db_index=True,
-        max_length=16,
         help_text="IPv4 or IPv6 network address",
     )
-    broadcast = VarbinaryIPField(null=False, db_index=True, max_length=16, help_text="IPv4 or IPv6 broadcast address")
+    broadcast = VarbinaryIPField(null=False, db_index=True, help_text="IPv4 or IPv6 broadcast address")
     prefix_length = models.IntegerField(null=False, db_index=True, help_text="Length of the Network prefix, in bits.")
     site = models.ForeignKey(
         to="dcim.Site",
@@ -717,10 +715,9 @@ class IPAddress(PrimaryModel, StatusModel):
     host = VarbinaryIPField(
         null=False,
         db_index=True,
-        max_length=16,
         help_text="IPv4 or IPv6 host address",
     )
-    broadcast = VarbinaryIPField(null=False, db_index=True, max_length=16, help_text="IPv4 or IPv6 broadcast address")
+    broadcast = VarbinaryIPField(null=False, db_index=True, help_text="IPv4 or IPv6 broadcast address")
     prefix_length = models.IntegerField(null=False, db_index=True, help_text="Length of the Network prefix, in bits.")
     vrf = models.ForeignKey(
         to="ipam.VRF",
