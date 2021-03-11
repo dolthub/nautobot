@@ -1805,7 +1805,10 @@ class ConsolePortTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -1928,7 +1931,10 @@ class ConsoleServerPortTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -2077,7 +2083,10 @@ class PowerPortTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -2220,7 +2229,10 @@ class PowerOutletTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -2409,7 +2421,10 @@ class InterfaceTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -2626,7 +2641,10 @@ class FrontPortTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -2783,7 +2801,10 @@ class RearPortTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -2871,7 +2892,10 @@ class DeviceBayTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 2)
         params = {"device": [devices[0].name, devices[1].name]}
@@ -3382,7 +3406,10 @@ class CableTestCase(TestCase):
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 4)
 
     def test_device(self):
-        devices = Device.objects.all()[:2]
+        devices = [
+            Device.objects.get(name="Device 1"),
+            Device.objects.get(name="Device 2"),
+        ]
         params = {"device_id": [devices[0].pk, devices[1].pk]}
         self.assertEqual(self.filterset(params, self.queryset).qs.count(), 3)
         params = {"device": [devices[0].name, devices[1].name]}
