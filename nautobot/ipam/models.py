@@ -13,10 +13,8 @@ from nautobot.dcim.models import Device, Interface
 from nautobot.extras.models import ObjectChange, Status, StatusModel
 from nautobot.extras.utils import extras_features
 from nautobot.core.models.generics import OrganizationalModel, PrimaryModel
-from nautobot.utilities.utils import array_to_string, serialize_object
 from nautobot.virtualization.models import VirtualMachine, VMInterface
 from nautobot.utilities.fields import JSONArrayField
-from nautobot.utilities.querysets import RestrictedQuerySet
 from nautobot.utilities.utils import array_to_string, serialize_object
 from .choices import *
 from .constants import *

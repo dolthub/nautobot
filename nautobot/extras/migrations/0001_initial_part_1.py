@@ -672,9 +672,7 @@ class Migration(migrations.Migration):
                 (
                     "choices",
                     nautobot.utilities.fields.JSONArrayField(
-                        base_field=models.CharField(max_length=100),
-                        blank=True,
-                        null=True
+                        base_field=models.CharField(max_length=100), blank=True, null=True
                     ),
                 ),
                 (

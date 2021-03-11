@@ -459,7 +459,7 @@ class Migration(migrations.Migration):
                         base_field=models.PositiveIntegerField(
                             validators=[
                                 django.core.validators.MinValueValidator(1),
-                                django.core.validators.MaxValueValidator(65535)
+                                django.core.validators.MaxValueValidator(65535),
                             ]
                         )
                     ),
