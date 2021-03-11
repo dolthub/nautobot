@@ -3,11 +3,10 @@
 import uuid
 from django.conf import settings
 import django.contrib.auth.models
-import django.contrib.postgres.fields
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-
+import nautobot.utilities.fields
 
 class Migration(migrations.Migration):
 
@@ -136,7 +135,7 @@ class Migration(migrations.Migration):
                 ("enabled", models.BooleanField(default=True)),
                 (
                     "actions",
-                    django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=30), size=None),
+                    nautobot.utilities.fields.JSONArrayField(base_field=models.CharField(max_length=30)),
                 ),
                 (
                     "constraints",
